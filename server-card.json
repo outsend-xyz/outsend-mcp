@@ -1,0 +1,565 @@
+{
+  "serverInfo": {
+    "name": "outsend",
+    "title": "OutSend",
+    "version": "1.0.0"
+  },
+  "description": "B2B lead generation your AI assistant can drive: extract local businesses, enrich them with emails, socials and reviews, verify emails, and chain it all into pipelines and recurring monitors.",
+  "websiteUrl": "https://outsend.xyz/docs/integration/mcp",
+  "iconUrl": "https://outsend.xyz/static/icons/icon-512.png",
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://outsend.xyz/mcp"
+  },
+  "authentication": {
+    "required": true,
+    "schemes": [
+      "oauth2",
+      "bearer"
+    ],
+    "description": "OAuth 2.1 (authorization code + PKCE S256, dynamic client registration and client ID metadata documents): add https://outsend.xyz/mcp as a custom connector in Claude.ai, sign in and authorize. Alternatively, a personal API key (osk_...) sent as 'Authorization: Bearer osk_...', created in OutSend under Settings -> API keys. Sign up: https://outsend.xyz/join/mcp",
+    "oauth": {
+      "protectedResourceMetadata": "https://outsend.xyz/.well-known/oauth-protected-resource/mcp",
+      "authorizationServer": "https://outsend.xyz",
+      "authorizationServerMetadata": "https://outsend.xyz/.well-known/oauth-authorization-server",
+      "scopes": [
+        "mcp",
+        "offline_access"
+      ]
+    }
+  },
+  "capabilities": {
+    "tools": {}
+  },
+  "tools": [
+    {
+      "name": "list_modules",
+      "title": "List modules",
+      "description": "Catalog of outsend data modules: what each one needs and produces. Call this first to know what is possible. Modules listed as coming_soon cannot be launched.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "List modules",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_pipeline_schema",
+      "title": "Get pipeline schema",
+      "description": "Machine contract for building pipelines: valid block types, per-block config schema, and chaining rules. Use before create_pipeline.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "Get pipeline schema",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "estimate_scrap",
+      "title": "Estimate scrape cost",
+      "description": "Estimate the cost (EF) and volume of a Google Maps extraction WITHOUT launching it. Always estimate before creating a large job. 1 EF = a full-France scrape for one query type.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 20,
+            "description": "Business types, e.g. ['plombier', 'electricien']"
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "description": "Cities, departments, regions or 'France'"
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO3 country code, default FRA"
+          },
+          "stop_at": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Stop after N unique places (recommended when the user gives a number)"
+          },
+          "scrap_mode": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "normal",
+              "ultra"
+            ]
+          }
+        },
+        "required": [
+          "queries",
+          "zones"
+        ]
+      },
+      "annotations": {
+        "title": "Estimate scrape cost",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create_scrap_job",
+      "title": "Create scrape job",
+      "description": "Launch a Google Maps extraction (async). Returns the job id immediately; poll get_job until status=done, then use get_job_results. When the user wants ~N results, set stop_at.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 20
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO3, default FRA"
+          },
+          "stop_at": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scrap_mode": {
+            "type": "string",
+            "enum": [
+              "fast",
+              "normal",
+              "ultra"
+            ]
+          },
+          "extra_columns": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "gps",
+                "departement",
+                "region"
+              ]
+            }
+          },
+          "max_per_phone": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "queries",
+          "zones"
+        ]
+      },
+      "annotations": {
+        "title": "Create scrape job",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create_enrichment_job",
+      "title": "Create enrichment job",
+      "description": "Enrich the results of a finished job (async): find emails, scrape reviews, detect social networks, verify emails, tech stack, etc. Returns the new job id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "enrichment": {
+            "type": "string",
+            "enum": [
+              "ads_intelligence",
+              "brand_assets",
+              "dead_check",
+              "emails",
+              "legal_data",
+              "legal_ids",
+              "legal_mentions",
+              "pagespeed",
+              "phone_info",
+              "phones_extra",
+              "pricing",
+              "reviews",
+              "socials",
+              "techstack",
+              "verify_emails"
+            ]
+          },
+          "source_job_id": {
+            "type": "string",
+            "description": "A job with status=done"
+          },
+          "email_mode": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "deep"
+            ],
+            "description": "Only for enrichment=emails. Default normal."
+          }
+        },
+        "required": [
+          "enrichment",
+          "source_job_id"
+        ]
+      },
+      "annotations": {
+        "title": "Create enrichment job",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_job",
+      "title": "Get job",
+      "description": "Status, counters and download URL of a job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ]
+      },
+      "annotations": {
+        "title": "Get job",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_job_results",
+      "title": "Get job results",
+      "description": "Preview of a finished job's rows (max 50 per call, paginate with offset) + total count + CSV download URL. Never dump thousands of rows into the conversation: show a sample, give the link.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "job_id"
+        ]
+      },
+      "annotations": {
+        "title": "Get job results",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "list_jobs",
+      "title": "List jobs",
+      "description": "The account's recent jobs, newest first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      },
+      "annotations": {
+        "title": "List jobs",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create_pipeline",
+      "title": "Create and start pipeline",
+      "description": "Create AND start a multi-step pipeline (e.g. scrap → emails → verify_emails). Keep chains LINEAR (each block feeds the next). Edges use the keys \"from\" and \"to\" — NOT source/target. Call get_pipeline_schema first for the valid block types and their config fields. Returns pipeline id + initial job ids.\nExample definition:\n{\"nodes\": [{\"id\": \"n1\", \"type\": \"scrap\", \"config\": {\"queries\": [\"plombier\"], \"zones\": [\"Lyon\"], \"stop_at\": 500}}, {\"id\": \"n2\", \"type\": \"emails\", \"config\": {}}], \"edges\": [{\"id\": \"e1\", \"from\": \"n1\", \"to\": \"n2\"}]}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "definition": {
+            "type": "object",
+            "description": "{nodes: [{id, type, config}], edges: [{id, from, to}]} — edge keys are \"from\"/\"to\", not source/target",
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "edges": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            },
+            "required": [
+              "nodes"
+            ]
+          }
+        },
+        "required": [
+          "definition"
+        ]
+      },
+      "annotations": {
+        "title": "Create and start pipeline",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "list_pipelines",
+      "title": "List pipelines",
+      "description": "The account's pipelines with status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "List pipelines",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create_monitor",
+      "title": "Create monitor",
+      "description": "Turn a finished job or pipeline into recurring monitoring: outsend re-runs it every N days and computes the diff (new / removed / modified places).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_job_id": {
+            "type": "string"
+          },
+          "source_pipeline_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "frequency_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          }
+        },
+        "required": [
+          "name",
+          "frequency_days"
+        ]
+      },
+      "annotations": {
+        "title": "Create monitor",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "list_monitors",
+      "title": "List monitors",
+      "description": "The account's recurring monitors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "title": "List monitors",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get_events",
+      "title": "Get events",
+      "description": "Account event feed (job.completed, pipeline.completed, veille.run_completed…). Cursor-based: pass back last_id as since_id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "since_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      },
+      "annotations": {
+        "title": "Get events",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": [
+            "mcp"
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [],
+  "prompts": []
+}

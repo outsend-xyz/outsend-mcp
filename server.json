@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "xyz.outsend/outsend",
+  "description": "Find local businesses, enrich them with emails and socials, and run lead pipelines from your AI.",
+  "title": "OutSend",
+  "version": "1.0.0",
+  "websiteUrl": "https://outsend.xyz/docs/integration/mcp",
+  "icons": [
+    {
+      "src": "https://outsend.xyz/static/icons/icon-512.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://outsend.xyz/mcp",
+      "headers": [
+        {
+          "description": "Bearer osk_... personal API key, created in OutSend under Settings -> API keys. Sign up: https://outsend.xyz/join/mcp",
+          "isRequired": true,
+          "isSecret": true,
+          "name": "Authorization"
+        }
+      ]
+    }
+  ]
+}
